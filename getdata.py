@@ -57,7 +57,8 @@ def download(url, path, once):
 def getHeader():
     for url in getUrls(True):
         names = url.split('/')
-        name = names[len(names) - 1]
+        name = 'data/' + names[len(names) - 1]
+        print(name)
         if not os.path.exists(name):
             download(url, name, True)
 
