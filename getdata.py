@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from urllib import request
+import pandas
 import os
 import requests
 import time
@@ -54,7 +55,8 @@ def download(url, path, once):
             if once:
                 return
 
-def getHeader():
+# 获取只有表头的数据
+def getHeaderData():
     for url in getUrls(True):
         names = url.split('/')
         name = 'data/' + names[len(names) - 1]
@@ -62,10 +64,47 @@ def getHeader():
         if not os.path.exists(name):
             download(url, name, True)
 
-# 下载区域
-if not os.path.exists('taxi+_zone_lookup.csv'):
-    download('https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv', 'taxi+_zone_lookup.csv')
+# 获取数据表头
+def saveHeader():
+    header_df = pandas.DataFrame(columns = ['name', 'col'])
+    list = os.listdir('data') #列出文件夹下所有的目录与文件
+    for i in range(0, len(list)):
+        path = os.path.join('data',list[i])
+        if os.path.isfile(path):
+            # 读取表头
+            header = pandas.read_csv(path, nrows=0)
+            print(list[i], header.columns)
+            for col in header.columns:       
+                header_df = header_df.append({'name' : list[i], 'col' : col}, ignore_index=True)
+    header_df.to_csv('header.csv')
 
 
-getHeader()
+
+# 下载区域文件
+def getZoomData():
+    if not os.path.exists('taxi+_zone_lookup.csv'):
+        download('https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv', 'taxi+_zone_lookup.csv')
+
+# 分析标签文件
+def analysisHeader():
+    header = pandas.read_csv('header.csv')
+    # 删选17，18，19，20的数据
+    names = ['fhv', 'green', 'yellow']
+    years = ['2017', '2018', '2019', '2020']
+    for name in names:
+        header_name = header[header['name'].str.contains(name)]
+        header_years = []
+        for year in years:
+            header_year = header_name[header_name['name'].str.contains(year)]
+            header_years.append(header_year)
+        header_name_years = pandas.concat(header_years)
+        cols = header_name_years['col'].drop_duplicates().sort_values()
+        print(cols)
+        print('')
+        print('')
+
+# getZoomData()
+# getHeaderData()
+# saveHeader()
+analysisHeader()
 
