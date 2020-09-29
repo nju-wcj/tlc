@@ -61,10 +61,11 @@ def download(url, path, once):
         return
     total_length = int(res.headers.get('content-length'))
 
-    with open(path, "wb") as pypkg:
+    with open(path, "wb") as f:
         for chunk in progress.bar(res.iter_content(chunk_size=1024), expected_size=(total_length/1024) + 1, width=100):
             if chunk:
-                pypkg.write(chunk)
+                f.write(chunk)
+                f.flush()
             if once:
                 return
 
