@@ -6,24 +6,34 @@ import requests
 import time
 from clint.textui import progress
 
-def fixData(url, header):
-    if header:
-        return True
+def fixData(url):
     if (url.find('yellow') >= 0 and url.find('2019') >= 0):
         return True
-    # elif (url.find('yellow') >= 0 and url.find('2018') >= 0):
-    #     return True
-    # elif (url.find('yellow') >= 0 and url.find('2017') >= 0):
-    #     return True
-    # elif (url.find('green') >= 0 and url.find('2017') >= 0):
-    #     return True
-    # elif (url.find('green') >= 0 and url.find('2018') >= 0):
-    #     return True
+    elif (url.find('yellow') >= 0 and url.find('2018') >= 0):
+        return True
+    elif (url.find('yellow') >= 0 and url.find('2017') >= 0):
+        return True
+    elif (url.find('yellow') >= 0 and url.find('2020') >= 0):
+        return True
+    elif (url.find('yellow') >= 0 and url.find('2020') >= 0):
+        return True
+    elif (url.find('green') >= 0 and url.find('2017') >= 0):
+        return True
+    elif (url.find('green') >= 0 and url.find('2018') >= 0):
+        return True
     elif (url.find('green') >= 0 and url.find('2019') >= 0):
+        return True
+    elif (url.find('fhv') >= 0 and url.find('2020') >= 0):
+        return True
+    elif (url.find('fhv') >= 0 and url.find('2017') >= 0):
+        return True
+    elif (url.find('fhv') >= 0 and url.find('2018') >= 0):
+        return True
+    elif (url.find('fhv') >= 0 and url.find('2019') >= 0):
         return True
     return False
 
-def getUrls(header=True):
+def getUrls():
     urls = []
     # 要请求的网络地址
     url = 'https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page'
@@ -37,7 +47,7 @@ def getUrls(header=True):
     for item in data:
         if item.string is not None and item['href'] != 'javascript:;' and item['href'] != '#':
             url = item.get('href')
-            if len(url) > 4 and url[-4:] == '.csv' and fixData(url, header):
+            if len(url) > 4 and url[-4:] == '.csv' and fixData(url):
                 urls.append(url)
     return urls
 
@@ -106,5 +116,6 @@ def analysisHeader():
 # getZoomData()
 # getHeaderData()
 # saveHeader()
-analysisHeader()
-
+# analysisHeader()
+for url in getUrls():
+    print(url)
