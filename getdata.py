@@ -5,8 +5,11 @@ import os
 import requests
 import time
 from clint.textui import progress
+from boto3.session import Session
 
-def fixData(url):
+def fixData(url, header):
+    if header:
+        return True
     if (url.find('yellow') >= 0 and url.find('2019') >= 0):
         return True
     elif (url.find('yellow') >= 0 and url.find('2018') >= 0):
@@ -33,7 +36,7 @@ def fixData(url):
         return True
     return False
 
-def getUrls():
+def getUrls(header=False):
     urls = []
     # 要请求的网络地址
     url = 'https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page'
@@ -47,7 +50,7 @@ def getUrls():
     for item in data:
         if item.string is not None and item['href'] != 'javascript:;' and item['href'] != '#':
             url = item.get('href')
-            if len(url) > 4 and url[-4:] == '.csv' and fixData(url):
+            if len(url) > 4 and url[-4:] == '.csv' and fixData(url, header):
                 urls.append(url)
     return urls
 
@@ -94,6 +97,9 @@ def saveHeader():
 def getZoomData():
     if not os.path.exists('taxi+_zone_lookup.csv'):
         download('https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv', 'taxi+_zone_lookup.csv')
+        session = Session(aws_access_key_id='AKIAS7W4C45L2MV2WPVE', aws_secret_access_key='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', region_name='ap-northeast-1')
+        s3 = session.client('s3')
+        s3.upload_file('taxi+_zone_lookup.csv', 'tlc-data', 'taxi-zone.csv')
 
 # 分析标签文件
 def analysisHeader():
@@ -113,9 +119,28 @@ def analysisHeader():
         print('')
         print('')
 
+# 上传2017-2020数据到s3
+def getHeaderData():
+    session = Session(aws_access_key_id='AKIAS7W4C45L2MV2WPVE', aws_secret_access_key='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', region_name='ap-northeast-1')
+    s3 = session.client('s3')
+    for url in getUrls(False):
+        names = url.split('/')
+        name = names[len(names) - 1]
+        print(name)
+        download(url, name, True)
+        print('start s3')
+        if 'fhv' in name:
+            s3.upload_file(name, 'tlc-data', 'fhv/' + name)
+        elif 'green' in name:
+            s3.upload_file(name, 'tlc-data', 'green/' + name)
+        elif 'yellow' in name:
+            s3.upload_file(name, 'tlc-data', 'yellow/' + name)
+        print('finish s3')
+        os.remove(name)
+
 # getZoomData()
 # getHeaderData()
 # saveHeader()
 # analysisHeader()
-for url in getUrls():
-    print(url)
+
+getHeaderData()
