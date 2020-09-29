@@ -127,7 +127,7 @@ def getHeaderData():
         names = url.split('/')
         name = names[len(names) - 1]
         print(name)
-        download(url, name, True)
+        download(url, name, False)
         print('start s3')
         if 'fhv' in name:
             s3.upload_file(name, 'tlc-data', 'fhv/' + name)
