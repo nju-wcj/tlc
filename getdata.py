@@ -6,6 +6,14 @@ import requests
 import time
 from clint.textui import progress
 from boto3.session import Session
+from botocore.exceptions import ClientError
+
+def findurl(s3_client, bucket_name, object_name, expiration=3600):
+    try:
+        response = s3_client.get_object(Bucket=bucket_name, Key=object_name)
+    except ClientError as e:
+        return None
+    return response
 
 def fixData(url, header):
     if header:
@@ -129,17 +137,20 @@ def getHeaderData():
     for url in getUrls(False):
         names = url.split('/')
         name = names[len(names) - 1]
-        print(url)
-        download(url, name, False)
-        print('start s3')
         if 'fhv' in name:
-            s3.upload_file(name, 'tlc-data', 'fhv/' + name)
+            name = 'fhv/' + name
         elif 'green' in name:
-            s3.upload_file(name, 'tlc-data', 'green/' + name)
+            name = 'green/' + name
         elif 'yellow' in name:
-            s3.upload_file(name, 'tlc-data', 'yellow/' + name)
-        print('finish s3')
-        os.remove(name)
+            name = 'yellow/' + name
+        # 判断文件是否存在
+        print(url)
+        if findurl(s3, 'tlc-data', name) is None:
+            download(url, name, False)
+            print('start s3')
+            s3.upload_file(name, 'tlc-data', name)
+            print('finish s3')
+            os.remove(name)
 
 # getZoomData()
 # getHeaderData()
