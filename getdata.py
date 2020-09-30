@@ -139,7 +139,8 @@ def getHeaderData():
         name = names[len(names) - 1]
         month = name.split('-')
         if len(month[1]) > 6:
-            name.replace('-0', '-')
+            name = name.replace('-0', '-')
+            url = url.replace('-0', '-')
         if 'fhv' in name:
             name = 'fhv/' + name
         elif 'green' in name:
