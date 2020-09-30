@@ -6,7 +6,6 @@ import requests
 import time
 from clint.textui import progress
 from boto3.session import Session
-import wget
 
 def fixData(url, header):
     if header:
@@ -70,7 +69,7 @@ def download(url, path, once):
                     f.flush()
                     return
     else:
-        wget.download(url, path)
+        request.urlretrieve(url, path)
 
 # 获取只有表头的数据
 def getHeaderData():
@@ -130,7 +129,7 @@ def getHeaderData():
     for url in getUrls(False):
         names = url.split('/')
         name = names[len(names) - 1]
-        print(name)
+        print(url)
         download(url, name, False)
         print('start s3')
         if 'fhv' in name:
