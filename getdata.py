@@ -141,18 +141,19 @@ def getHeaderData():
         if len(month[1]) > 6:
             name = name.replace('-0', '-')
             url = url.replace('-0', '-')
+        names3 = ''
         if 'fhv' in name:
-            name = 'fhv/' + name
+            names3 = 'fhv/' + name
         elif 'green' in name:
-            name = 'green/' + name
+            names3 = 'green/' + name
         elif 'yellow' in name:
-            name = 'yellow/' + name
+            names3 = 'yellow/' + name
         # 判断文件是否存在
         print(url)
-        if findurl(s3, 'tlc-data', name) is None:
+        if findurl(s3, 'tlc-data', names3) is None:
             download(url, name, False)
             print('start s3')
-            s3.upload_file(name, 'tlc-data', name)
+            s3.upload_file(name, 'tlc-data', names3)
             print('finish s3')
             os.remove(name)
 
