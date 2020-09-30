@@ -6,6 +6,7 @@ import requests
 import time
 from clint.textui import progress
 from boto3.session import Session
+import wget
 
 def fixData(url, header):
     if header:
@@ -56,18 +57,20 @@ def getUrls(header=False):
 
 # 进度条模块
 def download(url, path, once):
-    res = requests.get(url, stream=True)
-    if res.status_code != 200:
-        return
-    total_length = int(res.headers.get('content-length'))
+    if once:	
+        res = requests.get(url, stream=True)
+        if res.status_code != 200:
+            return
+        total_length = int(res.headers.get('content-length'))
 
-    with open(path, "wb") as f:
-        for chunk in progress.bar(res.iter_content(chunk_size=1024), expected_size=(total_length/1024) + 1, width=100):
-            if chunk:
-                f.write(chunk)
-                f.flush()
-            if once:
-                return
+        with open(path, "wb") as f:
+            for chunk in progress.bar(res.iter_content(chunk_size=1024), expected_size=(total_length/1024) + 1, width=100):
+                if chunk:
+                    f.write(chunk)
+                    f.flush()
+                    return
+    else:
+        wget.download(url, path)
 
 # 获取只有表头的数据
 def getHeaderData():
