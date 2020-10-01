@@ -178,12 +178,13 @@ def CombineFhv():
                     csv = csv.drop('Dispatching_base_num', 1)
                 csv.columns = csv.columns.str.lower()
                 csv.rename(columns=lambda x:x.replace('number','num'), inplace=True)
-                csv.to_csv('' + num + '-' + name, index=0)
+                filename = '%d-%s'%{num, name}
+                csv.to_csv(filename, index=0)
                 print('end modify')
-                path = 'fhv/' + num + '-' + name.split('/')[1]
+                path = 'fhv/' filename.split('/')[1]
                 print('up ' + path)
-                s3.upload_file('' + num + '-' + name, 'tlc-data', path)
-                os.remove('' + num + '-' + name)
+                s3.upload_file(filename, 'tlc-data', path)
+                os.remove(filename)
                 num += 1
 
 # getZoomData()
