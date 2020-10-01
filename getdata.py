@@ -172,9 +172,9 @@ def CombineFhv():
             chunks = pandas.read_csv(name, chunksize=2000000)
             num = 0
             for csv in chunks:
-                if 'SR_Flag' in df.columns；
+                if 'SR_Flag' in csv.columns:
                     csv = csv.drop('SR_Flag', 1)
-                if 'Dispatching_base_number' in df.columns；
+                if 'Dispatching_base_number' in csv.columns:
                     csv = csv.drop('Dispatching_base_num', 1)
                 csv.columns = csv.columns.str.lower()
                 csv.rename(columns=lambda x:x.replace('number','num'), inplace=True)
