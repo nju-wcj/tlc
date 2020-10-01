@@ -179,6 +179,7 @@ def CombineFhv():
             path = 'fhv/' + name.split('/')[1]
             print('up ' + path)
             s3.upload_file(name, 'tlc-data', path)
+            os.remove(name)
 
 # getZoomData()
 # getHeaderData()
