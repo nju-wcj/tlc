@@ -169,7 +169,7 @@ def CombineFhv():
             print('start modify')
             # 修改列
             # csv = pandas.read_csv(name)
-            chunks = pd.read_csv(file_path, chunksize=500000)
+            chunks = pandas.read_csv(file_path, chunksize=500000)
             num = 0
             for csv in chunks:
                 csv = csv.drop('SR_Flag', 1)
