@@ -181,7 +181,7 @@ def CombineFhv():
                 filename = '%d-%s'%(num, name.split('/')[1])
                 csv.to_csv(filename, index=0)
                 print('end modify')
-                path = 'fhv/' + name.split('/')[1]
+                path = 'fhv/' + filename
                 print('up ' + path)
                 s3.upload_file(filename, 'tlc-data', path)
                 os.remove(filename)
