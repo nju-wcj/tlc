@@ -184,7 +184,7 @@ def CombineFhv():
                 path = 'fhv/' + filename
                 print('up ' + path)
                 s3.upload_file(filename, 'tlc-data', path)
-                os.remove(filename)
+                # os.remove(filename)
                 num += 1
             os.remove(name)
 
