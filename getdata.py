@@ -178,10 +178,10 @@ def CombineFhv():
                     csv = csv.drop('Dispatching_base_num', 1)
                 csv.columns = csv.columns.str.lower()
                 csv.rename(columns=lambda x:x.replace('number','num'), inplace=True)
-                filename = '%d-%s'%(num, name)
+                filename = '%d-%s'%(num, name.split('/')[1])
                 csv.to_csv(filename, index=0)
                 print('end modify')
-                path = 'fhv/' + filename.split('/')[1]
+                path = 'fhv/' + name.split('/')[1]
                 print('up ' + path)
                 s3.upload_file(filename, 'tlc-data', path)
                 os.remove(filename)
