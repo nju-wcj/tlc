@@ -163,7 +163,7 @@ def CombineFhv():
     objs = s3.list_objects(Bucket='tlc-data')
     for obj in objs['Contents']:
         name = obj['Key']
-        if 'csv' in name and 'fhv' in name:
+        if 'csv' in name and 'fhv' in name and '2018' in name and 'fhv/' not in name:
             print('down ' + name)
             s3.download_file('tlc-data', name, name)
             print('start modify')
