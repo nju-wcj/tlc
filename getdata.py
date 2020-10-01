@@ -157,23 +157,6 @@ def getHeaderData():
             print('finish s3')
             os.remove(name)
 
-# 由于数据量较大，一次性读入可能造成内存错误(Memmory Error),因而使用pandas的分块读取
-def read_from_local(file_name, chunk_size=500000):
-    reader = pandas.read_csv(file_name, header=0, iterator=True, encoding="utf-8")
-    chunks = []
-    loop = True
-    while loop:
-        try:
-            chunk = reader.get_chunk(chunk_size)
-            chunks.append(chunk)
-        except StopIteration:
-            loop = False
-            print("Iteration is stopped!")
-    # 将块拼接为pandas dataFrame格式
-    df_ac = pandas.concat(chunks, ignore_index=True)
-    
-    return df_ac
-
 def CombineFhv():
     session = Session(aws_access_key_id='AKIAS7W4C45L2MV2WPVE', aws_secret_access_key='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', region_name='ap-northeast-1')
     s3 = session.client('s3')
@@ -186,17 +169,20 @@ def CombineFhv():
             print('start modify')
             # 修改列
             # csv = pandas.read_csv(name)
-            csv = read_from_local(name)
-            csv = csv.drop('SR_Flag', 1)
-            csv = csv.drop('Dispatching_base_num', 1)
-            csv.columns = csv.columns.str.lower()
-            csv.rename(columns=lambda x:x.replace('number','num'), inplace=True)
-            csv.to_csv(name, index=0)
-            print('end modify')
-            path = 'fhv/' + name.split('/')[1]
-            print('up ' + path)
-            s3.upload_file(name, 'tlc-data', path)
-            os.remove(name)
+            chunks = pd.read_csv(file_path, chunksize=500000)
+            num = 0
+            for csv in chunks:
+                csv = csv.drop('SR_Flag', 1)
+                csv = csv.drop('Dispatching_base_num', 1)
+                csv.columns = csv.columns.str.lower()
+                csv.rename(columns=lambda x:x.replace('number','num'), inplace=True)
+                csv.to_csv('' + num + '-' + name, index=0)
+                print('end modify')
+                path = 'fhv/' + num + '-' + name.split('/')[1]
+                print('up ' + path)
+                s3.upload_file('' + num + '-' + name, 'tlc-data', path)
+                os.remove('' + num + '-' + name)
+                num += 1
 
 # getZoomData()
 # getHeaderData()
