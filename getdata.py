@@ -159,7 +159,7 @@ def getHeaderData():
 
 # 由于数据量较大，一次性读入可能造成内存错误(Memmory Error),因而使用pandas的分块读取
 def read_from_local(file_name, chunk_size=500000):
-    reader = pd.read_csv(file_name, header=0, iterator=True, encoding="utf-8")
+    reader = pandas.read_csv(file_name, header=0, iterator=True, encoding="utf-8")
     chunks = []
     loop = True
     while loop:
@@ -170,7 +170,7 @@ def read_from_local(file_name, chunk_size=500000):
             loop = False
             print("Iteration is stopped!")
     # 将块拼接为pandas dataFrame格式
-    df_ac = pd.concat(chunks, ignore_index=True)
+    df_ac = pandas.concat(chunks, ignore_index=True)
     
     return df_ac
 
