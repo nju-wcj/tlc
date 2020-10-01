@@ -157,9 +157,33 @@ def getHeaderData():
             print('finish s3')
             os.remove(name)
 
+
+def CombineFhv():
+    session = Session(aws_access_key_id='AKIAS7W4C45L2MV2WPVE', aws_secret_access_key='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', region_name='ap-northeast-1')
+    s3 = session.client('s3')
+    objs = s3.list_objects(Bucket='tlc-data')
+    for obj in objs['Contents']:
+        name = obj['Key']
+        if 'csv' in name and 'fhv' in name:
+            print('down ' + name)
+            s3.download_file('tlc-data', name, name)
+            print('start modify')
+            # 修改列
+            csv = pandas.read_csv(name)
+            csv = csv.drop('SR_Flag', 1)
+            csv = csv.drop('Dispatching_base_num', 1)
+            csv.columns = csv.columns.str.lower()
+            csv.rename(columns=lambda x:x.replace('number','num'), inplace=True)
+            csv.to_csv(name, index=0)
+            print('end modify')
+            path = 'fhv/' + name.split('/')[1]
+            print('up ' + path)
+            s3.upload_file(name, 'tlc-data', path)
+
 # getZoomData()
 # getHeaderData()
 # saveHeader()
 # analysisHeader()
+# getHeaderData()
 
-getHeaderData()
+CombineFhv()
