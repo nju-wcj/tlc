@@ -19,7 +19,16 @@ data3 = data3.select('vendorid','pickup_datetime','dropoff_datetime','pulocation
 data = data0.unionByName(data1).unionByName(data2).unionByName(data3)
 data = data.rdd
 
-# 获取车辆当天工作总时间
+# 获取车辆时长
+def countAllCarTimeByDay(dataCarByDay):
+    et = '0000-00-00 00:00:00'
+    st = '9999-99-99 99:99:00'
+    for one in dataCarByDay:
+        if one['pickup_datetime'] < st :
+            st = one['pickup_datetime']
+        if one['dropoff_datetime'] > et :
+            et = one['dropoff_datetime']
+    return {'starttime' : st, 'endtime' : et}
 
 # 获取统计该月的总天数
 def getDaysByMonth(dataMonth):
@@ -31,27 +40,38 @@ def getZoomPUNumByTime(dataMonth, starttime, endtime):
     dataBytime = dataMonth.filter(lambda x : x['pickup_datetime'].split(' ')[1] > starttime and x['pickup_datetime'].split(' ')[1] < endtime)
     countByzoom = dataBytime.map(lambda x : ('264', x) if x['pulocationid'] is None else (x['pulocationid'], x)).countByKey()
     return countByzoom
+
 # 获取dropoff订单数
 def getZoomDONumByTime(dataMonth, starttime, endtime):
     dataBytime = dataMonth.filter(lambda x : x['dropoff_datetime'].split(' ')[1] > starttime and x['dropoff_datetime'].split(' ')[1] < endtime)
     countByzoom = dataBytime.map(lambda x : ('264', x) if x['dolocationid'] is None else (x['dolocationid'], x)).countByKey()
     return countByzoom
+
 # 获取正在进行的车辆及其订单
 def getOrderCarNumByTime(dataMonth, starttime, endtime):
     dataBytime = dataMonth.filter(lambda x : x['dropoff_datetime'].split(' ')[1] > starttime and x['pickup_datetime'].split(' ')[1] < endtime)
     dataBycar = dataBytime.map(lambda x : (x['vendorid'], x)).groupByKey()
     return dataBycar.count(), dataBytime.count()
-# 获取车辆非空载比例
-def getRateByTime(dataMonth, starttime, endtime):
-    dataCarByDay = dataMonth.map(lambda x : (x['vendorid'], x)).groupByKey().map(lambda x : (x[0], getAllTime(x[1])))
-    return 0
+
+# 获取车辆时刻表
+def getAllCarTimeByDay(dataMonth):
+    dataAllCarByDay = dataMonth.map(lambda x : (x['vendorid'] + ';' + x['pickup_datetime'].split(' ')[0], x)).groupByKey()
+    dataAllCarByDay = dataAllCarByDay.map(lambda x : (x[0].split(';')[0], countAllCarTimeByDay(x[1])))
+    return dataAllCarByDay
+
+# 获取当前所有车辆
+def getAllCarNumByTime(dataCarTime, starttime, endtime):
+    dataAllCarByTime = dataCarTime.filter(lambda x : x[1]['endtime'].split(' ')[1] > starttime and x[1]['starttime'].split(' ')[1] < endtime)
+    return dataAllCarByTime.count()
 
 zoomSize = zoom.count()
 for month in range(6, 7):
     # 过滤月
-    dataMonth = data.filter(lambda x : '-%02d-'%(month) in x['pickup_datetime'].split(' ')[0])
+    dataMonth = data.filter(lambda x : '-%02d-'%(month) in x['pickup_datetime'].split(' ')[0] and x['pickup_datetime'].split(' ')[0] == x['dropoff_datetime'].split(' ')[0])
     # 获取总天数
     days = getDaysByMonth(dataMonth)
+    # 获取车辆总时间
+    dataCarTime = getAllCarTimeByDay(dataMonth)
     for part in range(24 * 12):
         hour1 = int(part / 12)
         min1 = part % 12
@@ -60,5 +80,5 @@ for month in range(6, 7):
         starttime = '%02d:%02d:00'%(hour1, min1 * 5)
         endtime = '%02d:%02d:00'%(hour2, min2 * 5)
         print('%s-%s'%(starttime, endtime))
-        # 获取统一时刻订单数量
-        print(getOrderCarNumByTime(dataMonth, starttime, endtime))
+
+        print(getOrderCarNumByTime(dataMonth, starttime, endtime), getAllCarNumByTime(dataCarTime, starttime, endtime))
