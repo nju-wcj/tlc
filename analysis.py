@@ -53,6 +53,7 @@ def printMaxZoom(pickup_data, dropoff_data):
         dropoff_data_hour = dropoff_data_all[i : i * 12].sum()
         print(pickup_data_hour[pickup_data_hour == pickup_data_hour.max()].index[0], dropoff_data_hour[dropoff_data_hour == dropoff_data_hour.max()].index[0])
     # pickup_data_all['max'] = pickup_data_all.apply(lambda x : x[x == x.max()].index[0], axis = 1)
+    return pickup_data_hour, dropoff_data_hour
 
 # %%
 # 订单数量变化图
@@ -64,6 +65,7 @@ def printPUGraph(pickup_data, zoom):
     pickup_data.plot()
     plt.title('avgpickup')
     plt.show()
+    return pickup_data
 
 # %%
 # 需求数量变化图
@@ -75,6 +77,7 @@ def printDOGraph(dropoff_data, zoom):
     dropoff_data.plot()
     plt.title('avgdropoff')
     plt.show()
+    return dropoff_data
 
 # %%
 # 空载率变化图
@@ -84,6 +87,7 @@ def printRateGraph(rate_data):
     rate_data['mean'].plot()
     plt.title('rate')
     plt.show()
+    return rate_data['mean']
 
 # %%
 # 需求供应变化图
@@ -94,15 +98,25 @@ def printPUDOGraph(pickup_data, dropoff_data, zoom):
     dropoff_data = dropoff_data['%d'%(zoom)]
     dropoff_data = dropoff_data.map(lambda x : x['mean'])
     dropoff_data.rename('do74', inplace=True)
-    updo_data = pandas.concat([pickup_data, dropoff_data], axis = 1)
-    updo_data['rotia'] = updo_data.apply(lambda x : x['pu74'] / x['do74'], axis=1)
-    updo_data.rename(index=lambda x : getTime(int(x)), inplace=True)
+    pudo_data = pandas.concat([pickup_data, dropoff_data], axis = 1)
+    pudo_data['rotia'] = pudo_data.apply(lambda x : x['pu74'] / x['do74'], axis=1)
+    pudo_data.rename(index=lambda x : getTime(int(x)), inplace=True)
     plt.figure()
-    updo_data['rotia'].plot()
+    pudo_data['rotia'].plot()
     plt.title('rotia')
     plt.show()
+    return pudo_data['rotia']
 
-
+# %%
+# 阶梯价格曲线
+def printPriceGraph(pudo_data, rate_data):
+    price_data = pandas.concat([pudo_data, rate_data], axis = 1)
+    price_data['price'] = price_data.apply(lambda x : x['mean'] * 4 + x['rotia'] * 0.5, axis=1)
+    price_data['price'] = price_data['price'].smooth()
+    plt.figure()
+    price_data['price'].plot()
+    plt.title('price')
+    plt.show()
 
 # %%
 # 分析pickup数据
@@ -110,12 +124,12 @@ def analysisData():
     pickup_data, dropoff_data, rate_data = initData()
     pickup_data = pickup_data.applymap(lambda x : dataToObject(x))
     dropoff_data = dropoff_data.applymap(lambda x : dataToObject(x))
-    printMaxZoom(pickup_data, dropoff_data)
-    printPUGraph(pickup_data, 74)
-    printDOGraph(dropoff_data, 74)
-    printPUDOGraph(pickup_data, dropoff_data, 74)
-    printRateGraph(rate_data)
-
+    # printMaxZoom(pickup_data, dropoff_data)
+    # printPUGraph(pickup_data, 74)
+    # printDOGraph(dropoff_data, 74)
+    pudo_data = printPUDOGraph(pickup_data, dropoff_data, 74)
+    rate_data = printRateGraph(rate_data)
+    printPriceGraph(pudo_data, rate_data)
     
 # %%
 # 数据分析
