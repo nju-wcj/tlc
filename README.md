@@ -41,13 +41,13 @@ It is assumed that the demand supply ratio is strongly related to the month, the
 
 Let demand be D and supply P
 
-\1. By analyzing the mean and std at the same time, the number of orders boarding at the same time can be regarded as the increasing demand as ![img](file:////Users/yueyue/Library/Group%20Containers/UBF8T346G9.Office/TemporaryItems/msohtmlclip/clip_image002.png)
+\1. By analyzing the mean and std at the same time, the number of orders boarding at the same time can be regarded as the increasing demand as ![img](./clip_image002.png)
 
-\2. By analyzing the mean and std at the same time, the number of orders boarding at the same time can be regarded as the increased supply as ![img](file:////Users/yueyue/Library/Group%20Containers/UBF8T346G9.Office/TemporaryItems/msohtmlclip/clip_image004.png)
+\2. By analyzing the mean and std at the same time, the number of orders boarding at the same time can be regarded as the increased supply as ![img](./clip_image004.png)
 
-3The change rate of demand / supply ratio at the same time can be calculated from 1,2 as ![img](file:////Users/yueyue/Library/Group%20Containers/UBF8T346G9.Office/TemporaryItems/msohtmlclip/clip_image006.png)，the higher the value, the higher the new supply-demand ratio per unit time
+3The change rate of demand / supply ratio at the same time can be calculated from 1,2 as ![img](./clip_image006.png)，the higher the value, the higher the new supply-demand ratio per unit time
 
-4 The order load of vehicles at the same time is analyzed. Through the analysis of each vehicle, there is no order in progress at that time. Assuming that the time between the last order and the next order is less than 1 hour, then the vehicle is regarded as empty，Define the load as ![img](file:////Users/yueyue/Library/Group%20Containers/UBF8T346G9.Office/TemporaryItems/msohtmlclip/clip_image008.png)=![img](file:////Users/yueyue/Library/Group%20Containers/UBF8T346G9.Office/TemporaryItems/msohtmlclip/clip_image010.png)，The higher the value, the higher the vehicle load.
+4 The order load of vehicles at the same time is analyzed. Through the analysis of each vehicle, there is no order in progress at that time. Assuming that the time between the last order and the next order is less than 1 hour, then the vehicle is regarded as empty，Define the load as ![img](./clip_image008.png)=![img](./clip_image010.png)，The higher the value, the higher the vehicle load.
 
 We can think that the step price is positively correlated with the demand supply ratio, and positively correlated with load. Without considering the change of the supply-demand curve (when the price changes, the demand supply curve will change, which will lead to the change of market supply and demand. Due to the lack of conditions for the price to change with the supply-demand curve, we do not consider it) The higher the order load, the higher the step price
 
