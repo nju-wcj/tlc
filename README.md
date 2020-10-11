@@ -8,9 +8,9 @@ Download all headers.
 
 Analyzed all the tags, and the comprehensive analysis results are obtained.
 
-\1. Some year feature labels are miss.
+1. Some year feature labels are miss
 
-\2. The address have 2 types, GIS and area id, the area number is selected as the feature after evaluation.
+2. The address have 2 types, GIS and area id, the area number is selected as the feature after evaluation
 
 As result, the data from 2017 to 2020 meet the demand of analysis.
 
@@ -41,19 +41,17 @@ It is assumed that the demand supply ratio is strongly related to the month, the
 
 Let demand be D and supply P
 
-\1. By analyzing the mean and std at the same time, the number of orders boarding at the same time can be regarded as the increasing demand as ![img](./clip_image002.png)
+1. By analyzing the mean and std at the same time, the number of orders boarding at the same time can be regarded as the increasing demand as ![img](./clip_image002.png)
 
-\2. By analyzing the mean and std at the same time, the number of orders boarding at the same time can be regarded as the increased supply as ![img](./clip_image004.png)
+2. By analyzing the mean and std at the same time, the number of orders boarding at the same time can be regarded as the increased supply as ![img](./clip_image004.png)
+3. The change rate of demand / supply ratio at the same time can be calculated from 1,2 as ![img](./clip_image006.png)，the higher the value, the higher the new supply-demand ratio per unit time
+4. The order load of vehicles at the same time is analyzed. Through the analysis of each vehicle, there is no order in progress at that time. Assuming that the time between the last order and the next order is less than 1 hour, then the vehicle is regarded as empty，Define the load as ![img](./clip_image008.png)=![img](./clip_image010.png)，The higher the value, the higher the vehicle load
 
-3The change rate of demand / supply ratio at the same time can be calculated from 1,2 as ![img](./clip_image006.png)，the higher the value, the higher the new supply-demand ratio per unit time
-
-4 The order load of vehicles at the same time is analyzed. Through the analysis of each vehicle, there is no order in progress at that time. Assuming that the time between the last order and the next order is less than 1 hour, then the vehicle is regarded as empty，Define the load as ![img](./clip_image008.png)=![img](./clip_image010.png)，The higher the value, the higher the vehicle load.
-
-We can think that the step price is positively correlated with the demand supply ratio, and positively correlated with load. Without considering the change of the supply-demand curve (when the price changes, the demand supply curve will change, which will lead to the change of market supply and demand. Due to the lack of conditions for the price to change with the supply-demand curve, we do not consider it) The higher the order load, the higher the step price
+We can think that the step price is positively correlated with the demand supply ratio, and positively correlated with load. Without considering the change of the supply-demand curve (when the price changes, the demand supply curve will change, which will lead to the change of market supply and demand. Due to the lack of conditions for the price to change with the supply-demand curve, we do not consider it) The higher the order load, the higher the step price.
 
 ## Result Analysis
 
-Because of the large amount of data, the data of January and region 74 is selected as an example
+Because of the large amount of data, the data of January and region 74 is selected as an example.
 
 The avg of pick up quantity is shown in the figure below：
 
@@ -73,15 +71,15 @@ The change of order load rate is shown in the figure below：
 
 #### For enterprises
 
-Establish the following step model
+Establish the following step model:
 
 Step price = ratio * 0.5 + rate * 4 (parameters can be adjusted, price is limited between 1.0 and 2.0)
 
 ![price-1](./price-1.png)
 
-Finally, it is summarized into a table with dimensions of month, area and time:
+Finally, it is summarized into a table with dimensions of month, area and time,
 
-Step price list = function(month, region, time), select the right price at the right time
+Step price list = function(month, region, time), select the right price at the right time.
 
 #### For drivers
 
@@ -97,7 +95,7 @@ The regional timetable with the largest order data is as follows：
 | puid | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    |
 | doid | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    |
 
-It can be seen from the graph that area 255 should be selected between 0:00 a.m. and 8:00 a.m. it is reasonable to know that this area may be a gathering place for nightlife. Avoid dropoff in area 129.and it is reasonable to know that it is a living area, while area 74 should be selected between 8:00 and 24:00 a.m., and it is reasonable to know that this area may be a work business center
+It can be seen from the graph that area 255 should be selected between 0:00 a.m. and 8:00 a.m. it is reasonable to know that this area may be a gathering place for nightlife. Avoid dropoff in area 129.and it is reasonable to know that it is a living area, while area 74 should be selected between 8:00 and 24:00 a.m., and it is reasonable to know that this area may be a work business center.
 
 ## AWS Architecture
 
@@ -117,19 +115,19 @@ Lambda, API gateway: web api
 
 Process:
 
-\1. The data is synchronized to S3 through the timed task script
+1. The data is synchronized to S3 through the timed task script
 
-\2. ETL creates tables for S3 data
+2. ETL creates tables for S3 data
 
-\3. Using spark to analyze the data
+3. Using spark to analyze the data
 
-\4. The results are stored in database
+4. The results are stored in database
 
-\5. User access API Gateway
+5. User access API Gateway
 
-\6. API Gateway calls lambda function
+6. API Gateway calls lambda function
 
-\7. Lambda function calls the data result to get the answer
+7. Lambda function calls the data result to get the answer
 
 ## Source code address
 
