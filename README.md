@@ -1,127 +1,136 @@
-# TLC分析
+# TLC analysis
 
-## 数据整理
+## Data Arrangement
 
-根据开源https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page地址，通过html原文本文件获取URL地址
+According to https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page, Get URL address through HTML original text file.
 
-下载所有表头
+Download all headers.
 
-并对所有标签进行分析，综合分析得
+Analyzed all the tags, and the comprehensive analysis results are obtained.
 
-1， 部分年份特征标签较少
+\1. Some year feature labels are miss.
 
-2， 地址分为坐标和区域编号2中类型，经过评估选取区域编号作为特征
+\2. The address have 2 types, GIS and area id, the area number is selected as the feature after evaluation.
 
-以后分析所得2017-2020年数据符合分析需求
+As result, the data from 2017 to 2020 meet the demand of analysis.
 
-选用2017-2020年数据，并分别对fhv，green，yellow标签进行分析：
+The data from 2017 to 2020 were selected and cleaned, we analyzed the ‘fhv,’ ‘green’, ‘yellow’ tables.
 
-Fhv标签
+## Data Cleaning
 
-```
-43         DOLocationID
-49         DOlocationID
-45     Dispatching_base_num
-2192  Dispatching_base_number
-47       DropOff_datetime
-42         PULocationID
-48         PUlocationID
-46       Pickup_DateTime
-568           SR_Flag
-39     dispatching_base_num
-41       dropoff_datetime
-38      hvfhs_license_num
-40       pickup_datetime
-```
+Clear the invalid data and select the required feature value according to the label:
 
- Green标签
-
-```
-68       DOLocationID
-67       PULocationID
-66        RatecodeID
-62         VendorID
-818   congestion_surcharge
-76         ehail_fee
-72           extra
-71        fare_amount
-77   improvement_surcharge
-64   lpep_dropoff_datetime
-63   lpep_pickup_datetime
-73          mta_tax
-69      passenger_count
-79       payment_type
-65    store_and_fwd_flag
-74        tip_amount
-75       tolls_amount
-78       total_amount
-70       trip_distance
-80         trip_type
-```
-
-Yellow标签
-
-```
-203       DOLocationID
-202       PULocationID
-200        RatecodeID
-195         VendorID
-122   congestion_surcharge
-206          extra
-205       fare_amount
-210  improvement_surcharge
-207         mta_tax
-198     passenger_count
-204       payment_type
-201    store_and_fwd_flag
-208        tip_amount
-209       tolls_amount
-211       total_amount
-197  tpep_dropoff_datetime
-196   tpep_pickup_datetime
-199      trip_distance
-```
+|                        | Feature              |                      |                      |
+| ---------------------- | -------------------- | -------------------- | -------------------- |
+| Table                  | Fhv                  | Green                | Yellow               |
+| Order id               | Dispatching_base_num | VendorID             | VendorID             |
+| The  date of pick up   | pickup_datetime      | lpep_pickup_datetime | tpep_pickup_datetime |
+| The  date of drop off  | dropoff_datetime     | lpep_pickup_datetime | tpep_pickup_datetime |
+| Region  id of pick up  | PULocationID         | PULocationID         | PULocationID         |
+| Region  id of drop off | DOLocationID         | DOLocationID         | DOLocationID         |
 
  
 
-根据标签选取所需要的特征值：
+## Data theory
 
-Fhv车由于有大小写区分，分别取特征值
+We can use time series model training or statistical analysis to analyze the three tables.
 
-```
-Dispatching_base_num：派遣编号
-pickup_datetime：上车时间
-dropoff_datetime：下车时间
-PULocationID：上车地点编号
-DOLocationID：下车地点编号
-```
+This paper adopts the statistical analysis method. Due to the instability of the time series and the prediction of the latest period of data in the future, for drivers and companies, additional statistics are needed, and statistical analysis can analyze the commonness from the data.
 
- Green车，分别取特征值
+It is assumed that the demand supply ratio is strongly related to the month, the time of each moment and the region, and weakly related to the specific date of each month (in fact, weekend and ordinary influence are received, but the overall trend can be considered as similar). Therefore, the dimension of the data table is established as [month, region, time (every 5 minutes)].
 
-```
-VendorID：订单编号
-lpep_pickup_datetime：上车时间
-lpep_pickup_datetime：下车时间
-PULocationID：上车地点编号
-DOLocationID：下车地点编号
-trip_distance：旅行距离
-passenger_count：乘客人数
-total_amount：总费用
-```
+Let demand be D and supply P
 
-Yellow车，分别取特征值
+\1. By analyzing the mean and std at the same time, the number of orders boarding at the same time can be regarded as the increasing demand as ![img](file:////Users/yueyue/Library/Group%20Containers/UBF8T346G9.Office/TemporaryItems/msohtmlclip/clip_image002.png)
 
-```
-VendorID：订单编号
-tpep_pickup_datetime：上车时间
-tpep_pickup_datetime：下车时间
-PULocationID：上车地点编号
-DOLocationID：下车地点编号
-trip_distance：旅行距离
-passenger_count：乘客人数
-total_amount：总费用
-```
+\2. By analyzing the mean and std at the same time, the number of orders boarding at the same time can be regarded as the increased supply as ![img](file:////Users/yueyue/Library/Group%20Containers/UBF8T346G9.Office/TemporaryItems/msohtmlclip/clip_image004.png)
 
- 
+3The change rate of demand / supply ratio at the same time can be calculated from 1,2 as ![img](file:////Users/yueyue/Library/Group%20Containers/UBF8T346G9.Office/TemporaryItems/msohtmlclip/clip_image006.png)，the higher the value, the higher the new supply-demand ratio per unit time
 
- 
+4 The order load of vehicles at the same time is analyzed. Through the analysis of each vehicle, there is no order in progress at that time. Assuming that the time between the last order and the next order is less than 1 hour, then the vehicle is regarded as empty，Define the load as ![img](file:////Users/yueyue/Library/Group%20Containers/UBF8T346G9.Office/TemporaryItems/msohtmlclip/clip_image008.png)=![img](file:////Users/yueyue/Library/Group%20Containers/UBF8T346G9.Office/TemporaryItems/msohtmlclip/clip_image010.png)，The higher the value, the higher the vehicle load.
+
+We can think that the step price is positively correlated with the demand supply ratio, and positively correlated with load. Without considering the change of the supply-demand curve (when the price changes, the demand supply curve will change, which will lead to the change of market supply and demand. Due to the lack of conditions for the price to change with the supply-demand curve, we do not consider it) The higher the order load, the higher the step price
+
+## Result Analysis
+
+Because of the large amount of data, the data of January and region 74 is selected as an example
+
+The avg of pick up quantity is shown in the figure below：
+
+![avfpu-1](./avfpu-1.png)
+
+The avg of drop off quantity is shown in the figure below：
+
+![avgdo-1](./avgdo-1.png)
+
+The change rate of demand supply is shown in the figure below:
+
+![rotia-1](./rotia-1.png)
+
+The change of order load rate is shown in the figure below：
+
+![rate-1](./rate-1.png)
+
+#### For enterprises
+
+Establish the following step model
+
+Step price = ratio * 0.5 + rate * 4 (parameters can be adjusted, price is limited between 1.0 and 2.0)
+
+![price-1](./price-1.png)
+
+Finally, it is summarized into a table with dimensions of month, area and time:
+
+Step price list = function(month, region, time), select the right price at the right time
+
+#### For drivers
+
+They need to know the location and area of order data in each time, and select this area to get more orders at the right time, due to the large amount of data, the January data is selected as an example.
+
+The regional timetable with the largest order data is as follows：
+
+| Date | 00:00 | 01:00 | 02:00 | 0300  | 04:00 | 05:00 | 06:00 | 07:00 | 08:00 | 0900  | 10:00 | 11:00 |
+| ---- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+| puid | 255   | 255   | 255   | 255   | 255   | 255   | 255   | 255   | 74    | 74    | 74    | 74    |
+| doid | 129   | 129   | 129   | 129   | 129   | 129   | 129   | 129   | 129   | 74    | 74    | 74    |
+| Date | 12:00 | 13:00 | 14:00 | 15:00 | 16:00 | 17:00 | 18:00 | 19:00 | 20:00 | 21:00 | 22:00 | 23:00 |
+| puid | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    |
+| doid | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    | 74    |
+
+It can be seen from the graph that area 255 should be selected between 0:00 a.m. and 8:00 a.m. it is reasonable to know that this area may be a gathering place for nightlife. Avoid dropoff in area 129.and it is reasonable to know that it is a living area, while area 74 should be selected between 8:00 and 24:00 a.m., and it is reasonable to know that this area may be a work business center
+
+## AWS Architecture
+
+The use of AWS resources is as follows:
+
+S3: data store
+
+EC2: data organize
+
+Glue: data analysis
+
+RDS: results store
+
+Lambda, API gateway: web api
+
+![img](./aws.png)
+
+Process:
+
+\1. The data is synchronized to S3 through the timed task script
+
+\2. ETL creates tables for S3 data
+
+\3. Using spark to analyze the data
+
+\4. The results are stored in database
+
+\5. User access API Gateway
+
+\6. API Gateway calls lambda function
+
+\7. Lambda function calls the data result to get the answer
+
+## Source code address
+
+https://github.com/yueyuelove/tlc.git
