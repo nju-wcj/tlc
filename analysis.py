@@ -9,6 +9,13 @@ from boto3.session import Session
 import matplotlib.pyplot as plt
 
 # %%
+# 获取时间
+def getTime(part):
+    hour = int(part / 12)
+    min = part % 12
+    return '%02d:%02d'%(hour, min * 5)
+
+# %%
 # 获取数据结果
 def getResult():
     session = Session(aws_access_key_id='AKIAS7W4C45L2MV2WPVE', aws_secret_access_key='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', region_name='ap-northeast-1')
@@ -44,8 +51,7 @@ def printMaxZoom(pickup_data, dropoff_data):
     for i in range(24):
         pickup_data_hour = pickup_data_all[i : i * 12].sum()
         dropoff_data_hour = dropoff_data_all[i : i * 12].sum()
-        # print(pickup_data_hour[pickup_data_hour == pickup_data_hour.max()].index[0])
-        print(dropoff_data_hour[dropoff_data_hour == dropoff_data_hour.max()].index[0])
+        print(pickup_data_hour[pickup_data_hour == pickup_data_hour.max()].index[0], dropoff_data_hour[dropoff_data_hour == dropoff_data_hour.max()].index[0])
     # pickup_data_all['max'] = pickup_data_all.apply(lambda x : x[x == x.max()].index[0], axis = 1)
 
 # %%
@@ -53,6 +59,7 @@ def printMaxZoom(pickup_data, dropoff_data):
 def printPUGraph(pickup_data, zoom):
     pickup_data = pickup_data['%d'%(zoom)]
     pickup_data = pickup_data.map(lambda x : x['mean'])
+    pickup_data.rename(index=lambda x : getTime(int(x)), inplace=True)
     plt.figure()
     pickup_data.plot()
     plt.title('avgpickup')
@@ -63,6 +70,7 @@ def printPUGraph(pickup_data, zoom):
 def printDOGraph(dropoff_data, zoom):
     dropoff_data = dropoff_data['%d'%(zoom)]
     dropoff_data = dropoff_data.map(lambda x : x['mean'])
+    dropoff_data.rename(index=lambda x : getTime(int(x)), inplace=True)
     plt.figure()
     dropoff_data.plot()
     plt.title('avgdropoff')
@@ -72,9 +80,29 @@ def printDOGraph(dropoff_data, zoom):
 # 空载率变化图
 def printRateGraph(rate_data):
     plt.figure()
+    rate_data.rename(index=lambda x : getTime(int(x)), inplace=True)
     rate_data['mean'].plot()
     plt.title('rate')
     plt.show()
+
+# %%
+# 需求供应变化图
+def printPUDOGraph(pickup_data, dropoff_data, zoom):
+    pickup_data = pickup_data['%d'%(zoom)]
+    pickup_data = pickup_data.map(lambda x : x['mean'])
+    pickup_data.rename('pu74', inplace=True)
+    dropoff_data = dropoff_data['%d'%(zoom)]
+    dropoff_data = dropoff_data.map(lambda x : x['mean'])
+    dropoff_data.rename('do74', inplace=True)
+    updo_data = pandas.concat([pickup_data, dropoff_data], axis = 1)
+    updo_data['rotia'] = updo_data.apply(lambda x : x['pu74'] / x['do74'], axis=1)
+    updo_data.rename(index=lambda x : getTime(int(x)), inplace=True)
+    plt.figure()
+    updo_data['rotia'].plot()
+    plt.title('rotia')
+    plt.show()
+
+
 
 # %%
 # 分析pickup数据
@@ -82,13 +110,16 @@ def analysisData():
     pickup_data, dropoff_data, rate_data = initData()
     pickup_data = pickup_data.applymap(lambda x : dataToObject(x))
     dropoff_data = dropoff_data.applymap(lambda x : dataToObject(x))
-    # printMaxZoom(pickup_data, dropoff_data)
+    printMaxZoom(pickup_data, dropoff_data)
     printPUGraph(pickup_data, 74)
     printDOGraph(dropoff_data, 74)
+    printPUDOGraph(pickup_data, dropoff_data, 74)
     printRateGraph(rate_data)
 
     
 # %%
 # 数据分析
 analysisData()
+# %%
+
 # %%
